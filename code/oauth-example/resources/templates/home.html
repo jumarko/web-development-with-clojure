@@ -1,0 +1,39 @@
+<!--
+ ! Excerpted from "Web Development with Clojure, Second Edition",
+ ! published by The Pragmatic Bookshelf.
+ ! Copyrights apply to this code. It may not be used to create training material,
+ ! courses, books, articles, and the like. Contact us if you are in doubt.
+ ! We make no guarantees that this code is fit for any purpose.
+ ! Visit http://www.pragmaticprogrammer.com/titles/dswdcloj2 for more book information.
+-->
+{% extends "base.html" %}
+{% block content %}
+  <div class="jumbotron">
+    <h1>Welcome to oauth-example</h1>
+    <p>Time to start building your site!</p>
+    <p>
+      <a class="btn btn-primary btn-lg" href="http://luminusweb.net">
+      Learn more &raquo;
+      </a>
+    </p>
+  </div>
+
+  <div class="row">
+    <div class="span12">
+
+      {% if denied %}
+        <h2>Failed to sign in!</h2>
+      {% endif %}
+
+      {% if screen-name %}
+        <h2>Welcome {{screen-name}}</h2>
+      {% else %}
+        <a href="/oauth/twitter-init">
+          <img src="img/sign-in-with-twitter-gray.png" alt="Sign in with Twitter">
+          </img>
+        </a>
+      {% endif %}
+      </h2>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,1 @@
+{:database-url "jdbc:postgresql://localhost/picture_gallery_dev?user=db_user_name_here&password=db_user_password_here"}
