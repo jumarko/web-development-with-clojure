@@ -1,49 +1,37 @@
 (ns guestbook.core
-  (:gen-class)
-  (:require :as
-            [cider.nrepl :refer [cider-middleware]]
-            [clojure.tools
-             [cli :refer [parse-opts]]
-             [logging :as log]]
-            [clojure.tools.nrepl.server :as nrepl]
-            [guestbook
-             [config :refer [env]]
-             [handler :as handler]]
-            [luminus
-             [http-server :as http]
-             [repl-server :as repl]]
+  (:require [guestbook.handler :as handler]
+            [luminus.repl-server :as repl]
+            [luminus.http-server :as http]
             [luminus-migrations.core :as migrations]
-            [mount.core :as mount]
-            refactor-nrepl.middleware
-            [clojure.string :refer [join]]))
+            [guestbook.config :refer [env]]
+            [clojure.tools.cli :refer [parse-opts]]
+            [clojure.tools.logging :as log]
+            [mount.core :as mount])
+  (:gen-class))
 
 (def cli-options
   [["-p" "--port PORT" "Port number"
     :parse-fn #(Integer/parseInt %)]])
 
 (mount/defstate ^{:on-reload :noop}
-  http-server
-  :start
-  (http/start
-   (-> env
-       (assoc :handler (handler/app))
-       (update :port #(or (-> env :options :port) %))))
-  :stop
-  (http/stop http-server))
-
-(defn cider&cljr-nrepl-handler []
-  (apply nrepl/default-handler (cons #'refactor-nrepl.middleware/wrap-refactor
-                                     (map resolve cider-middleware))))
+                http-server
+                :start
+                (http/start
+                  (-> env
+                      (assoc :handler (handler/app))
+                      (update :port #(or (-> env :options :port) %))))
+                :stop
+                (http/stop http-server))
 
 (mount/defstate ^{:on-reload :noop}
-  repl-server
-  :start
-  (when-let [nrepl-port (env :nrepl-port)]
-    (repl/start {:port nrepl-port
-                 :handler (cider&cljr-nrepl-handler)}))
-  :stop
-  (when repl-server
-    (repl/stop repl-server)))
+                repl-server
+                :start
+                (when-let [nrepl-port (env :nrepl-port)]
+                  (repl/start {:port nrepl-port}))
+                :stop
+                (when repl-server
+                  (repl/stop repl-server)))
+
 
 (defn stop-app []
   (doseq [component (:stopped (mount/stop))]
@@ -67,4 +55,4 @@
       (System/exit 0))
     :else
     (start-app args)))
-
+  
