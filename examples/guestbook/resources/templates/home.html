@@ -8,6 +8,7 @@
     </a></p>
 </div>
 
+<!-- List messages -->
 <div class="row">
   <div class="col-sm-12">
       <ul class="content">
@@ -18,6 +19,33 @@
               <p> - {{item.name}}</p>
           </li>
           {% endfor %}
+      </ul>
   </div>
+</div>
+
+<!-- Add new message form -->
+<div class="row">
+    <div class="col-sm-12">
+        <form method="POST" action="/message">
+            <div class="form-group">
+                {% csrf-field %}
+                <p>
+                    Name:
+                    <input class="form-control"
+                           type="text"
+                           name="name"
+                           value="" />
+                </p>
+                <p>
+                    Message:
+                    <textarea class="form-control"
+                              rows="4"
+                              cols="50"
+                              name="message"></textarea>
+                </p>
+                <input type="submit" class="btn btn-primary" value="comment" />
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}
