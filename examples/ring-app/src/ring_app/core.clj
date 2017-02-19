@@ -1,10 +1,10 @@
 (ns ring-app.core
   (:require [ring.adapter.jetty :as jetty]
-            [ring.util.response :as response]
+            [ring.util.http-response :as r]
             [ring.middleware.reload :refer [wrap-reload]]))
 
 (defn handler [request-map]
-  (response/response
+  (r/ok
    (str "<html><body>your IP is:" (:remote-addr request-map) "</body></html>")))
 
 (defn wrap-nocache
