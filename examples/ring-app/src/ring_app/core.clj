@@ -1,9 +1,9 @@
 (ns ring-app.core
   (:require [ring.adapter.jetty :as jetty]
-            [ring.util.response :as response]))
+            [ring.util.response :as response]
+            [ring.middleware.reload :refer [wrap-reload]]))
 
 (defn handler [request-map]
-  (prn request-map)
   (response/response
    (str "<html><body>your IP is:" (:remote-addr request-map) "</body></html>")))
 
@@ -17,6 +17,9 @@
 
 (defn -main []
   (jetty/run-jetty
-   (wrap-nocache handler)
+   (-> handler
+       var ;; notice that we need to create var from handler for wrap-reload to work
+       wrap-nocache
+       wrap-reload)
    {:port 3000
     :join? false}))
