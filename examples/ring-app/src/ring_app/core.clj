@@ -9,11 +9,10 @@
   (r/ok
    (str "<html><body> your IP is: " (:remote-addr request) " </body></html>")))
 
-(def handler
-  (c/routes
+(c/defroutes handler
    (c/GET "/" request response-handler)
    (c/GET "/:id" [id] (str "<p>the id is: " id " </p>"))
-   (c/POST "/json" [id] (r/ok {:result id}))))
+   (c/POST "/json" [id] (r/ok {:result id})))
 
 (defn wrap-nocache
   "middleware which wraps response with 'Pragma: no-cache' header"
