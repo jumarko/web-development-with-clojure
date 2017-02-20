@@ -1,11 +1,19 @@
 (ns ring-app.core
   (:require [ring.adapter.jetty :as jetty]
+            [ring.middleware.reload :refer [wrap-reload]]
             [ring.util.http-response :as r]
-            [ring.middleware.reload :refer [wrap-reload]]))
+            [ring.middleware.format :refer [wrap-restful-format]]
+            [compojure.core :as c]))
 
-(defn handler [request-map]
+(defn- response-handler [request]
   (r/ok
-   (str "<html><body>your IP is:" (:remote-addr request-map) "</body></html>")))
+   (str "<html><body> your IP is: " (:remote-addr request) " </body></html>")))
+
+(def handler
+  (c/routes
+   (c/GET "/" request response-handler)
+   (c/GET "/:id" [id] (str "<p>the id is: " id " </p>"))
+   (c/POST "/json" [id] (r/ok {:result id}))))
 
 (defn wrap-nocache
   "middleware which wraps response with 'Pragma: no-cache' header"
@@ -15,11 +23,19 @@
         handler
         (assoc-in [:headers "Pragma"] "no-cache"))))
 
+(defn wrap-formats
+  "Add JSON format"
+  [handler]
+  (wrap-restful-format
+   handler
+   {:formats [:json-kw :transit-json :transit-msgpack]}))
+
 (defn -main []
   (jetty/run-jetty
    (-> handler
        var ;; notice that we need to create var from handler for wrap-reload to work
        wrap-nocache
-       wrap-reload)
+       wrap-reload
+       wrap-formats)
    {:port 3000
     :join? false}))
