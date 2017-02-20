@@ -10,9 +10,20 @@
    (str "<html><body> your IP is: " (:remote-addr request) " </body></html>")))
 
 (c/defroutes handler
-   (c/GET "/" request response-handler)
-   (c/GET "/:id" [id] (str "<p>the id is: " id " </p>"))
-   (c/POST "/json" [id] (r/ok {:result id})))
+  (c/GET "/" request response-handler)
+  (c/GET "/:id" [id] (str "<p>the id is: " id " </p>"))
+  (c/POST "/json" [id] (r/ok {:result id})))
+
+;; compojure also allows us to avoid repetition using context macro
+(defn display-profile [id] )
+(defn display-settings [id] )
+(defn change-password-page [id] )
+
+(c/defroutes user-routes
+  (c/context "/user/:id" [id]
+    (c/GET "/profile" [] (display-profile id))
+    (c/GET "/settings" [] (display-settings id))
+    (c/GET "/change-password" [] (change-password-page id))))
 
 (defn wrap-nocache
   "middleware which wraps response with 'Pragma: no-cache' header"
