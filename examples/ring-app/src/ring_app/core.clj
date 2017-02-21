@@ -3,6 +3,7 @@
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.util.http-response :as r]
             [ring.middleware.format :refer [wrap-restful-format]]
+            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [compojure.core :as c]))
 
 (defn- response-handler [request]
@@ -11,7 +12,12 @@
 
 (c/defroutes handler
   (c/GET "/" request response-handler)
+  ;; example from https://github.com/weavejester/compojure/wiki/Destructuring-Syntax
+  (c/GET "/foo/foo3/:id" [id greeting] (str "<h1>" greeting " user " id " </h1>"))
   (c/GET "/:id" [id] (str "<p>the id is: " id " </p>"))
+  ;; notice that output of following is a little bit strange with additional commas in quotes between elements
+  (c/GET "/foo/foo" request (interpose ", " (keys request)))
+  (c/POST "/foo/foo2" [x y :as request] (str x y request))
   (c/POST "/json" [id] (r/ok {:result id})))
 
 ;; compojure also allows us to avoid repetition using context macro
@@ -44,6 +50,7 @@
   (jetty/run-jetty
    (-> handler
        var ;; notice that we need to create var from handler for wrap-reload to work
+       (wrap-defaults site-defaults)
        wrap-nocache
        wrap-reload
        wrap-formats)
