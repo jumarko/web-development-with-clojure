@@ -1,5 +1,10 @@
-(ns guestbook.core)
+(ns guestbook.core
+  (:require [reagent.core :as r :refer [atom]]))
 
-(-> (.getElementById js/document "content")
-    (.-innerHTML)
-    (set! "Hello World!"))
+(defn home
+  []
+  [:div#hello.content>p "Hello world!"])
+
+(r/render
+ [home]
+ (.getElementById js/document "content"))

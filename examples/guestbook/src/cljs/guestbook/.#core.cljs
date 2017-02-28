@@ -1,1 +1,0 @@
-jumar@Jurajs-MacBook-Pro.local.78276
