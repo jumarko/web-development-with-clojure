@@ -5,38 +5,35 @@
             [compojure.core :refer [defroutes GET POST]]
             [guestbook.db.core :as db]
             [guestbook.layout :as layout]
-            [ring.util.http-response :as response]))
+            [ring.util.response :refer [response status]]))
 
-(defn home-page [{:keys [flash]}]
-  (layout/render
-   "home.html"
-   (merge {:messages (db/get-messages)}
-          (select-keys flash [:name :message :errors]))))
+(defn home-page []
+  (layout/render "home.html"))
 
 (defn validate-message
   "Check if incoming message is valid to be stored in DB."
   [params]
   (first (b/validate
-   params
-   :name v/required
-   :message [v/required [v/min-count 10]])))
+          params
+          :name v/required
+          :message [v/required [v/min-count 10]])))
 
 (defn save-message! [{:keys [params]}]
   (if-let [errors (validate-message params)]
-    (do
-    (-> (response/found "/")
-        (assoc :flash (assoc params :errors errors)))
-    )
+    (-> {:errors errors}
+        response
+        (status 400))
     (do
       (db/save-message!
        (assoc params :timestamp (java.util.Date.)))
-      (response/found "/"))))
+      (response {:status :ok}))))
 
 (defn about-page []
   (layout/render "about.html"))
 
 (defroutes home-routes
-  (GET "/" request (home-page request))
-  (POST "/message" request (save-message! request))
+  (GET "/" request (home-page))
+  (GET "/messages" [] (response (db/get-messages)))
+  (POST "/add-message" request (save-message! request))
   (GET "/about" [] (about-page)))
 

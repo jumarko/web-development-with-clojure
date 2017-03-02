@@ -28,7 +28,8 @@
                  [ring/ring-defaults "0.2.3"]
                  [selmer "1.10.6"]
                  [org.clojure/clojurescript "1.9.494"]
-                 [reagent "0.6.0"]]
+                 [reagent "0.6.0"]
+                 [cljs-ajax "0.5.8"]]
 
   :min-lein-version "2.0.0"
 
