@@ -15,6 +15,9 @@
 (def app-routes
   (routes
    #'websocket-routes
+   (-> #'home-routes
+       (wrap-routes middleware/wrap-csrf)
+       (wrap-routes middleware/wrap-formats))
    (wrap-routes #'home-routes middleware/wrap-csrf)
    (route/not-found
     (:body
