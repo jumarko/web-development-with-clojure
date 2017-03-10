@@ -16,6 +16,8 @@
   (routes
    #'websocket-routes
    (-> #'home-routes
+       ring.middleware.keyword-params/wrap-keyword-params
+       ring.middleware.params/wrap-params
        (wrap-routes middleware/wrap-csrf)
        (wrap-routes middleware/wrap-formats))
    (wrap-routes #'home-routes middleware/wrap-csrf)

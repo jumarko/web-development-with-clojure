@@ -1,32 +1,39 @@
 (ns guestbook.ws
-  (:require [cognitect.transit :as t]))
+  (:require [taoensso.sente :as sente]))
 
-;; atom that holds the websocket channel
-(defonce ws-channel (atom nil))
+(let [connection (sente/make-channel-socket! "/ws" {:type :auto})]
+  (def ch-chsk (:ch-recv connection))
+  (def send-message! (:send-fn connection)))
 
-;;; serialization helpers
-(def json-reader (t/reader :json))
-(def json-writer (t/writer :json))
+(defn state-handler [{:keys [?data]}]
+  (.log js/console (str "state changed: " ?data)))
 
-;; deserialize message before passing it to the handler
-(defn receive-message! [handler]
-  (fn [message]
-    (->> message
-         .-data
-         (t/read json-reader)
-         handler)))
+(defn handshake-handler [{:keys [?data]}]
+  (.log js/console (str "connection established: " ?data)))
 
-;; send transit-encoded message through channel
-(defn send-message! [message]
-  (if @ws-channel
-    (->> message
-         (t/write json-writer)
-         (.send @ws-channel))
-    (throw (js/Error. "WebSocket is not available!"))))
+(defn default-event-handler [ev-msg]
+  (.log js/console (str "Unhandled event: " (:event ev-msg))))
 
-(defn connect! [url handler]
-  (if-let [channel (js/WebSocket. url)]
-    (do
-      (set! (.-onmessage channel) (receive-message! handler))
-      (reset! ws-channel channel))
-    (throw (js/Error. "WebSocket connection failed!"))))
+(defn event-msg-handler [& [{:keys [message state handshake] :or {state state-handler
+                                                                  handshake handshake-handler}}]]
+  (fn [ev-msg]
+    (case (:id ev-msg)
+      :chsk/handshake (handshake ev-msg)
+      :chsk/state (state ev-msg)
+      :chsk/recv (message ev-msg)
+      (default-event-handler ev-msg))))
+
+;;; now comes the router
+(def router (atom nil))
+
+(defn stop-router! []
+  (when-let [stop-fn @router] (stop-fn)))
+
+(defn start-router! [message-handler]
+  (stop-router!)
+  (reset! router (sente/start-chsk-router!
+                  ch-chsk
+                  (event-msg-handler
+                   {:message message-handler
+                    :state state-handler
+                    :handshake handshake-handler}))))

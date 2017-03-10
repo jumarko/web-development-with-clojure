@@ -29,7 +29,8 @@
                  [selmer "1.10.6"]
                  [org.clojure/clojurescript "1.9.494"]
                  [reagent "0.6.0"]
-                 [cljs-ajax "0.5.8"]]
+                 [cljs-ajax "0.5.8"]
+                 [com.taoensso/sente "1.11.0"]]
 
   :min-lein-version "2.0.0"
 
