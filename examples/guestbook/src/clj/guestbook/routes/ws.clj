@@ -12,11 +12,12 @@
 
 (let [connection (sente/make-channel-socket!
                   (get-sch-adapter)
-                  {:user-id-fn (fn [ring-req] (get-in ring-req [:params :client-id]))})] (def ring-ajax-post (:ajax-post-fn  connection))
-  (def ring-ajax-get-or-ws-handshake (:ajax-get-or-ws-handshake  connection))
+                  {:user-id-fn (fn [ring-req] (get-in ring-req [:params :client-id]))})]
+  (def ring-ajax-post (:ajax-post-fn  connection))
+  (def ring-ajax-get-or-ws-handshake (:ajax-get-or-ws-handshake-fn connection))
   (def ch-chsk (:ch-recv  connection))
   (def chsk-send! (:send-fn  connection))
-  (def connected-uuids (:connected-uuids  connection)))
+  (def connected-uids (:connected-uids  connection)))
 
 (defn validate-message
   "Check if incoming message is valid to be stored in DB."
@@ -41,7 +42,7 @@
                        save-message!)]
       (if (:errors response)
         (chsk-send! client-id [:guestbook/error response])
-        (doseq [uid (:any @connected-uuids)]
+        (doseq [uid (:any @connected-uids)]
           (chsk-send! uid [:guestbook/add-message response]))))))
 
 (defn stop-router! [stop-fn]
@@ -55,5 +56,5 @@
   :stop (stop-router! router))
 
 (defroutes websocket-routes
-  (GET "/ws" req ring-ajax-get-or-ws-handshake req)
-  (POST "/ws" req ring-ajax-post req))
+  (GET "/ws" req (ring-ajax-get-or-ws-handshake req))
+  (POST "/ws" req (ring-ajax-post req)))
