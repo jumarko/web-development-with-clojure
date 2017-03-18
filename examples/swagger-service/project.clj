@@ -28,7 +28,10 @@
                  ;; TODO: use these libraries for simpler XML parsing or remove them
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/data.zip "0.1.2"]
-                 [clj-http "3.4.1"]]
+                 [clj-http "3.4.1"]
+                 [reagent "0.6.1"]
+                 [cljs-ajax "0.5.8"]
+                 [secretary "1.2.3"]]
 
   :min-lein-version "2.0.0"
 
