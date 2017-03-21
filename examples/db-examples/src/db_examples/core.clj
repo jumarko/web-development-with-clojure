@@ -57,3 +57,26 @@
  {:id "foo1" :pass "bar"}
  {:id "foo2" :pass "bar"}
  {:id "foo3" :pass "bar"})
+
+;;; update existing records
+(defn set-pass! [id pass]
+  (sql/update!
+   db
+   :users
+   ;; map representing updated rows
+   {:pass pass}
+   ;; WHERE clause represented by a vector
+   ["id=?" id]))
+
+(set-pass! "foo" "barbaz")
+
+;;; Deleting records
+(defn remove-user! [id]
+  (sql/delete! db :users ["id=?" id]))
+
+(remove-user! "foo")
+
+;;; Transactions
+(sql/with-db-transaction [t-conn db]
+  (sql/update! t-conn :users {:pass "bar"} ["id=?" "foo"])
+  (sql/update! t-conn :users {:pass "baz"} ["id=?" "bar"]))
